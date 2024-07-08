@@ -4,8 +4,8 @@ name: Databricks Terraform Infrastructure Pipeline AWS
 on:
   push:
     branches: [main]
-  # pull_request:
-  #   branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 env:
   BACKEND_RG_NAME: ${{ secrets.BACKEND_RG_NAME }}
@@ -29,7 +29,7 @@ jobs:
   deploy:
     name: AWS Workspace Deployment with Terraform
 
-    # if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request'
 
     environment: AWS
 
@@ -108,7 +108,7 @@ jobs:
   sat:
     name: SAT Installation with Terraform
 
-    #if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request'
 
     needs: deploy
 
@@ -183,21 +183,29 @@ jobs:
       - name: SAT Installation Unit Test
         id: unittest
         run: |
-          pytest -v test_sat_installation.py        
+          pytest -v test_sat_installation.py --junitxml=pytest.xml 
         working-directory: ${{ env.TESTS_DIR }}
         env:
           DATABRICKS_HOST: ${{ needs.deploy.outputs.databricks_workspace_host }}
           DATABRICKS_TOKEN: ${{ needs.deploy.outputs.databricks_workspace_pat }}
         continue-on-error: true
 
-      - name: SAT Installation Unit Test Status
-        if: steps.unittest.outcome == 'failure'
-        run: exit 1
+      - name: Publish Test Results
+        id: publish
+        uses: turing85/publish-report@v2.0.2
+        if: always()
+        with:
+          name: SAT-Test-Report
+          path: './pytest.xml'
 
+      - name: SAT Installation Status
+        if: steps.apply.outcome == 'failure'
+        run: exit 1
+        
   destroy:
     name: AWS Workspace Destroy with Terraform
 
-    #if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     needs: sat
 
     environment: AWS
