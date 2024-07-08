@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 env:
   BACKEND_RG_NAME: ${{ secrets.BACKEND_RG_NAME }}
@@ -117,6 +117,7 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
+      pull-requests: write
 
     runs-on: ubuntu-latest
     strategy:
@@ -183,7 +184,7 @@ jobs:
       - name: SAT Installation Unit Test
         id: unittest
         run: |
-          pytest -v test_sat_installation.py --junitxml=pytest.xml 
+          pytest -v test_sat_installation.py --junitxml=pytest.xml
         working-directory: ${{ env.TESTS_DIR }}
         env:
           DATABRICKS_HOST: ${{ needs.deploy.outputs.databricks_workspace_host }}
@@ -195,13 +196,13 @@ jobs:
         uses: turing85/publish-report@v2.0.2
         if: always()
         with:
-          name: SAT-Test-Report
-          path: './pytest.xml'
+          report-name: SAT-Test-Report
+          report-path: "./pytest.xml"
 
       - name: SAT Installation Status
         if: steps.apply.outcome == 'failure'
         run: exit 1
-        
+
   destroy:
     name: AWS Workspace Destroy with Terraform
 
