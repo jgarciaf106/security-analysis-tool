@@ -196,8 +196,8 @@ jobs:
         uses: turing85/publish-report@v2.0.2
         if: always()
         with:
-          report-name: SAT-Test-Report
-          report-path: "./pytest.xml"
+          report-name: "SAT Test Report"
+          report-path: "${{ env.TESTS_DIR }}/pytest.xml"
 
       - name: SAT Installation Status
         if: steps.apply.outcome == 'failure'
