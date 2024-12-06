@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# sh <(curl -fsSL https://raw.githubusercontent.com/jgarciaf106/security-analysis-tool/main/install.sh)
-
 # TUI settings
 COLUMNS=12
 
